@@ -22,7 +22,7 @@ func HeaderLogger(next http.Handler) http.Handler {
 				fmt.Printf("%s: %s\n", name, value)
 			}
 		}
-		fmt.Println("====================\n")
+		fmt.Println("====================")
 		next.ServeHTTP(w, req)
 	})
 }
