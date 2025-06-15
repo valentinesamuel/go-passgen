@@ -83,6 +83,69 @@ Run it from your terminal:
 
 ---
 
+## ✅ **Tests & Benchmarks**
+
+This project uses Go’s standard testing tools for correctness and performance.
+
+### 📌 **Run all tests**
+
+```bash
+go test -v
+```
+
+### 📌 **Run table-driven unit tests**
+
+> (Included in `go test`; see `password_test.go`)
+
+```bash
+go test -v
+```
+
+### 📌 **Run benchmark tests**
+
+```bash
+go test -bench=.
+```
+
+Example output:
+
+```
+goos: darwin
+goarch: arm64
+pkg: github.com/yourusername/passgen
+BenchmarkBuildPasswordPool-8   	1000000	      1234 ns/op
+PASS
+ok  	github.com/yourusername/passgen	2.345s
+```
+
+### 📌 **Check test coverage**
+
+```bash
+go test -cover
+```
+
+### 📌 **Generate and view coverage report**
+
+```bash
+# Generate coverage profile
+go test -coverprofile=coverage.out
+
+# Open an HTML report in your browser
+go tool cover -html=coverage.out
+```
+
+---
+
+## 📌 **Run tests in CI**
+
+To automate tests in GitHub Actions or any CI:
+
+```bash
+go test ./...
+```
+
+---
+
 ## ⚙️ Notes
 
 * The generator uses the `crypto/rand` package for secure random bytes.
