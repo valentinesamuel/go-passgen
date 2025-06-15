@@ -109,13 +109,17 @@ func generatePassword(passwordLength int, upperCase, lowerCase, digits, symbols 
 		passwordPool += symbolsPool
 	}
 
-	return passwordPool, nil
+	if len(passwordPool) <= 0 {
+		return "", fmt.Errorf("please select at least one character set")
+	}
+
+	return buildPasswordPool(passwordLength, passwordPool)
 }
 
 func buildPasswordPool(passwordLength int, pool string) (string, error) {
 	password := make([]rune, passwordLength)
 	maxValue := big.NewInt(int64(len(pool)))
-	for char := 0; char < passwordLength; char++ {
+	for char := range password {
 		randomNumber, err := rand.Int(rand.Reader, maxValue)
 		if err != nil {
 			fmt.Println("Error:", err)
