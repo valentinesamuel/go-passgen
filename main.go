@@ -1,11 +1,11 @@
 package main
 
-import "C"
 import (
 	"crypto/rand"
 	"flag"
 	"fmt"
 	"math/big"
+	"net/http"
 )
 
 var upperCasePool = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -13,7 +13,47 @@ var lowerCasePool = "abcdefghijklmnopqrstuvwxyz"
 var digitsPool = "0123456789"
 var symbolsPool = "!@#$%^&*()-_=+[]{}|;:,.<>?/~`"
 
+type ResponseData struct {
+	Data     any    `json:"data"`
+	Success  bool   `json:"success"`
+	Message  string `json:"message"`
+	Response string `json:"response"`
+}
+
 func main() {
+	var cliMode bool
+
+	flag.BoolVar(&cliMode, "cli", true, "starts the program in cliMode")
+	flag.Parse()
+
+	fmt.Println("CLI Mode is", cliMode)
+	if !cliMode {
+		serverModule()
+	} else {
+		cliModule()
+	}
+}
+
+func serverModule() {
+	// Create a new ServeMux to register routes
+	mux := http.NewServeMux()
+
+	// Register routes on the new mux
+	mux.HandleFunc("/generate", HandleGeneratePassword)
+
+	// Create handler chain with both middlewares
+	// The order is important - RequestLogger will run first, then HeaderLogger
+	handler := RequestLogger(HeaderLogger(mux))
+
+	fmt.Println("Started server .....")
+	err := http.ListenAndServe(":8080", handler)
+	if err != nil {
+		fmt.Println("Error starting the server")
+		return
+	}
+}
+
+func cliModule() {
 	fmt.Println("Password generator started in GoLang...")
 
 	var passwordLength int
@@ -32,7 +72,7 @@ func main() {
 
 	flag.Parse()
 
-	pool := generatePassword(passwordLength, upperCase, lowerCase, digits, symbols)
+	pool, _ := generatePassword(passwordLength, upperCase, lowerCase, digits, symbols)
 
 	fmt.Println(passwordLength)
 
@@ -41,20 +81,19 @@ func main() {
 		return
 	}
 
-	finalPassword := buildPasswordPool(passwordLength, pool)
+	finalPassword, _ := buildPasswordPool(passwordLength, pool)
 
 	generateHelp(help)
 
 	fmt.Println(finalPassword)
 }
 
-func generatePassword(passwordLength int, upperCase, lowerCase, digits, symbols bool) string {
+func generatePassword(passwordLength int, upperCase, lowerCase, digits, symbols bool) (string, error) {
 	var passwordPool string
 
 	if passwordLength < 10 {
-		err := fmt.Errorf("The minimum password length is  %d", passwordLength)
-		fmt.Println(err.Error())
-		return ""
+		err := fmt.Errorf("the minimum password length is %d", 10)
+		return "", err
 	}
 
 	if upperCase {
@@ -70,21 +109,17 @@ func generatePassword(passwordLength int, upperCase, lowerCase, digits, symbols 
 		passwordPool += symbolsPool
 	}
 
-	if passwordLength > 10 {
-		fmt.Println("This password length might be too long to remember")
-	}
-
-	return passwordPool
+	return passwordPool, nil
 }
 
-func buildPasswordPool(passwordLength int, pool string) string {
+func buildPasswordPool(passwordLength int, pool string) (string, error) {
 	password := make([]rune, passwordLength)
 	maxValue := big.NewInt(int64(len(pool)))
 	for char := 0; char < passwordLength; char++ {
 		randomNumber, err := rand.Int(rand.Reader, maxValue)
 		if err != nil {
 			fmt.Println("Error:", err)
-			return ""
+			return "", err
 		}
 		randomIndex := int(randomNumber.Int64())
 
@@ -93,7 +128,7 @@ func buildPasswordPool(passwordLength int, pool string) string {
 
 	finalPassword := string(password)
 
-	return finalPassword
+	return finalPassword, nil
 }
 
 func generateHelp(help bool) {
