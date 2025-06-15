@@ -27,7 +27,7 @@ Generates strong random passwords using crypto-grade randomness, with customizab
 1. Make sure you have [Go installed](https://go.dev/dl/).
 2. Clone this repo:
     ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/valentinesamuel/go-passgen
    cd passgen
     ```
 
@@ -93,6 +93,6 @@ Run it from your terminal:
 
 ## ✨ Author
 
-Built with ❤️ by Valentine Samuel (and ChatGPT as my technical pairing buddy who helped me create this README😄).
+Built with ❤️ by Me (and ChatGPT as my technical pairing buddy who helped me create this README😄).
  
  
